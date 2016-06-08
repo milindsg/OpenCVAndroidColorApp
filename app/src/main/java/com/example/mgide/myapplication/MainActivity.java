@@ -22,6 +22,8 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.imgproc.Imgproc;
 
+import java.util.ArrayList;
+
 import static com.example.mgide.myapplication.R.*;
 
 
@@ -31,6 +33,23 @@ public class MainActivity extends AppCompatActivity implements OnTouchListener,C
 
     private Scalar mBlobColorHsv;
     private Scalar mBlobColorRgba;
+
+
+    private Scalar mYellowRgba;
+    private Scalar mOrangeRgba;
+    private Scalar mBlueRgba;
+    private Scalar mPinkRgba;
+    private Scalar mGreenRgba;
+
+    private ArrayList<Scalar> colorRGBList = new ArrayList<Scalar>();
+    private ArrayList<String> colorNamesList = new ArrayList<String>();
+
+    private ArrayList colorDistances = new ArrayList();
+
+    private double minColorDistance  ;
+    private double colorDist ;
+    private int closestColorIndex;
+    private String closestColor;
 
     double x = -1;
     double y = -1;
@@ -67,6 +86,21 @@ public class MainActivity extends AppCompatActivity implements OnTouchListener,C
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.opencv_tutorial_activity_surface_view);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
+
+        // TODO
+        // Change these values based on your observations !!
+        mYellowRgba = new Scalar(255,255,0);
+        mOrangeRgba = new Scalar(255,0,0);
+        mBlueRgba = new Scalar(0,255,0);
+        mPinkRgba = new Scalar(255,10,0);
+        mGreenRgba = new Scalar(0,255,0);
+        //
+
+        colorRGBList.add(mYellowRgba);
+        colorNamesList.add("Yellow");
+
+        //TODO
+        //Add other RGB values to the colorRGBList and corresponding names to the colorNamesList in the same way as shown above
 
     }
 
@@ -134,7 +168,7 @@ public class MainActivity extends AppCompatActivity implements OnTouchListener,C
         x = x * xScale;
         y = y * yScale;
         if((x < 0) || (y < 0) || (x > cols) || (y > rows)) return false;
-        touch_coordinates.setText("X: " + Double.valueOf(x) + ", Y: " + Double.valueOf(y));
+        touch_coordinates.setText("X: " + String.format("%3.2f",x) + ", Y: " + String.format("%3.2f",y));
         Rect touchedRect = new Rect();
 
         touchedRect.x = (int)x;
@@ -156,9 +190,38 @@ public class MainActivity extends AppCompatActivity implements OnTouchListener,C
 
         mBlobColorRgba = convertScalarHsv2Rgba(mBlobColorHsv);
 
-        touch_color.setText("Color: #" + String.format("%02X", (int)mBlobColorRgba.val[0])
-                + String.format("%02X", (int)mBlobColorRgba.val[1])
-                + String.format("%02X", (int)mBlobColorRgba.val[2]));
+
+         //TODO
+        minColorDistance =  0; //Change this value to maximum distance possible or at least a very large value
+        closestColorIndex = 0;
+        for(int i = 0;  i < colorRGBList.size(); i++)
+        {
+            colorDist  = getColorDifference(colorRGBList.get(i),mBlobColorRgba);
+
+
+            if (colorDist < minColorDistance) {
+                closestColorIndex = i;
+                minColorDistance = colorDist;
+            }
+        }
+
+        closestColor = colorNamesList.get(closestColorIndex);
+
+
+
+
+        //Display RGB values for average color in 8 x 8 area around touched point
+        touch_color.setText("Color: R = " + String.format("%d", (int)mBlobColorRgba.val[0])
+                + ", G = " + String.format("%d",(int)mBlobColorRgba.val[1])
+                + ", B = " + String.format("%d",(int)mBlobColorRgba.val[2])
+                + ", Closest Color = " + closestColor);
+
+
+        // Uncomment next 4 lines to see Hex code instead of RGB
+        // touch_color.setText("Color: #" + String.format("%02X", (int)mBlobColorRgba.val[0])
+        //        + String.format("%02X", (int)mBlobColorRgba.val[1])
+        //        + String.format("%02X", (int)mBlobColorRgba.val[2])
+        //        + ", Closest Color = " + closestColor );
 
         touch_color.setTextColor(Color.rgb((int) mBlobColorRgba.val[0],
                 (int) mBlobColorRgba.val[1],
@@ -168,6 +231,19 @@ public class MainActivity extends AppCompatActivity implements OnTouchListener,C
                 (int)mBlobColorRgba.val[2]));
 
         return false;
+    }
+
+    private double getColorDifference(Scalar color1, Scalar color2)
+    {
+        double colorDiffVal = 0 ;
+
+        for(int i = 0; i < 3; i++)
+        {
+           //TODO
+            // Write expression to compute sum of squared difference of RGB values of color1 and color2
+            // HINT:  RGB values in scalar x are stored in  x.val[0], x.val[1] and x.val[2] respectively
+        }
+        return colorDiffVal;
     }
 
     private Scalar convertScalarHsv2Rgba(Scalar hsvColor) {
